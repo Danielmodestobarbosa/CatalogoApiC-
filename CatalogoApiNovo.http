@@ -1,0 +1,6 @@
+@CatalogoApiNovo_HostAddress = http://localhost:5258
+
+GET {{CatalogoApiNovo_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
