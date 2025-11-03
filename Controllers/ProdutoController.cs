@@ -13,44 +13,43 @@ namespace CatalogoApiNovo.Controllers
     {
         //Injeção de dependência
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
-        public ProdutoController(AppDbContext context)
+        public ProdutoController(AppDbContext context, ILogger<ProdutoController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public ActionResult<IEnumerable<ProdutoModel>> BuscarTodosProdutos()
+        public async Task <IEnumerable<ProdutoModel>> BuscarTodosProdutos()
         {
-
-            var produtos = _context.Produtos.ToList();
-            if(produtos is null)
-            {
-                return NotFound();
-            }
-            return produtos;
+            return await _context.Produtos.AsNoTracking().ToListAsync();
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<ProdutoModel> ObterProdutoPorId(int id)
         {
-           throw new Exception("Exceção ao retornar o produto por Id");
-
             var produto = _context.Produtos.FirstOrDefault(p=> p.ProdutoId == id);
+
             if(produto is null)
             {
-                return NotFound("Produto não encontrado");
+                _logger.LogWarning($"Produto com id= {id} não encontrado");
+                return NotFound($"Produto com id= {id} não encontrado");
             }
 
-            return produto;
+            return Ok(produto);
         }
 
         [HttpPost]
         public ActionResult  AdicionaProduto (ProdutoModel produto)
         {
             if (produto is null)
-                return BadRequest();
+            {
+                _logger.LogWarning($"Dados inválidos");
+                  return StatusCode(StatusCodes.Status500InternalServerError, "Dados inválidos");
+            }
 
             _context.Produtos.Add(produto);
             _context.SaveChanges();
@@ -63,7 +62,8 @@ namespace CatalogoApiNovo.Controllers
         {
             if(id != produto.ProdutoId)
             {
-                return BadRequest();
+                _logger.LogWarning($"Produto com id= {id} não encontrado");
+                return StatusCode(StatusCodes.Status400BadRequest, $"\"Produto com id= {id} não encontrado");
             }
 
             _context.Entry(produto).State = EntityState.Modified;
@@ -78,7 +78,8 @@ namespace CatalogoApiNovo.Controllers
             var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
             if (produto is null)
             {
-                return NotFound("Produto não localizado");
+                _logger.LogWarning($"Produco com {id} não encotrado");
+                return StatusCode(StatusCodes.Status404NotFound, $"Produco com {id} não encotrado");
             }
 
             _context.Produtos.Remove(produto);

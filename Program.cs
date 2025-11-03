@@ -1,7 +1,9 @@
 using CatalogoApiNovo.Data;
 using CatalogoApiNovo.Extensions;
 using CatalogoApiNovo.Filters;
+using CatalogoApiNovo.Logging;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,19 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<ApiLogginFilter>();
 
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(typeof(ApiExceptionFilter));
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,4 +1,5 @@
 ﻿using CatalogoApiNovo.Data;
+using CatalogoApiNovo.Filters;
 using CatalogoApiNovo.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,13 @@ namespace CatalogoApiNovo.Controllers
 
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public CategoriaController(AppDbContext context, IConfiguration configuration)
+        public CategoriaController(AppDbContext context, IConfiguration configuration, ILogger<CategoriaController> logger)
         {
             _context = context;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpGet("LerArquivoConfiguracao")]
@@ -33,6 +36,30 @@ namespace CatalogoApiNovo.Controllers
            
         }
 
-        
+        [HttpGet("{id:int}", Name = "ObterCategoria")]
+        public ActionResult<CategoriaModel> ListaCategoriaPorId (int id)
+        {
+
+            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+
+            if(categoria == null)
+            {
+                _logger.LogWarning($"Categoria com id= {id} não encontrada");
+                return NotFound($"Categoria com id= {id} não encontrada");
+            }
+
+            return Ok(categoria);
+        }
+
+        [HttpGet]
+        [ServiceFilter(typeof(ApiLogginFilter))]
+        public async Task<ActionResult<IEnumerable<CategoriaModel>>> ListaTodasCategorias()
+        {
+            return await _context.Categorias.AsNoTracking().ToListAsync();
+        }
+
+        [HttpPost]
+
+
     }
 }

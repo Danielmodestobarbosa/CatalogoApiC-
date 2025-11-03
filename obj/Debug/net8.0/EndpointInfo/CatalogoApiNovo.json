@@ -34,6 +34,85 @@
         }
       }
     },
+    "/(categorias)/{id}": {
+      "get": {
+        "tags": [
+          "Categoria"
+        ],
+        "operationId": "ObterCategoria",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaModel"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaModel"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/(categorias)": {
+      "get": {
+        "tags": [
+          "Categoria"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaModel"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaModel"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/Produto": {
       "get": {
         "tags": [
@@ -206,6 +285,37 @@
   },
   "components": {
     "schemas": {
+      "CategoriaModel": {
+        "required": [
+          "imagemUrl",
+          "nome"
+        ],
+        "type": "object",
+        "properties": {
+          "categoriaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nome": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "imagemUrl": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "produtos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProdutoModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ProdutoModel": {
         "required": [
           "descricao",

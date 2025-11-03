@@ -169,3 +169,4 @@ C:\CursoWebApi\CatalogoApiNovo\CatalogoApiNovo\obj\Debug\net8.0\CatalogoApiNovo.
 C:\CursoWebApi\CatalogoApiNovo\CatalogoApiNovo\obj\Debug\net8.0\CatalogoApiNovo.genruntimeconfig.cache
 C:\CursoWebApi\CatalogoApiNovo\CatalogoApiNovo\obj\Debug\net8.0\ref\CatalogoApiNovo.dll
 C:\CursoWebApi\CatalogoApiNovo\CatalogoApiNovo\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\CursoWebApi\CatalogoApiNovo\CatalogoApiNovo\obj\Debug\net8.0\CatalogoApiNovo.sourcelink.json
