@@ -2,6 +2,7 @@ using CatalogoApiNovo.Data;
 using CatalogoApiNovo.Extensions;
 using CatalogoApiNovo.Filters;
 using CatalogoApiNovo.Logging;
+using CatalogoApiNovo.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -20,6 +21,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ApiLogginFilter>();
+
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {

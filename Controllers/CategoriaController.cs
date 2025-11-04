@@ -1,6 +1,7 @@
 ﻿using CatalogoApiNovo.Data;
 using CatalogoApiNovo.Filters;
 using CatalogoApiNovo.Model;
+using CatalogoApiNovo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,34 +14,20 @@ namespace CatalogoApiNovo.Controllers
     public class CategoriaController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger _logger;
+        private readonly ICategoriaRepository _repository;
+        private readonly ILogger<CategoriaController> _logger;
 
-        public CategoriaController(AppDbContext context, IConfiguration configuration, ILogger<CategoriaController> logger)
+        public CategoriaController(ICategoriaRepository repository, ILogger<CategoriaController> logger)
         {
-            _context = context;
-            _configuration = configuration;
+            _repository = repository;
             _logger = logger;
-        }
-
-        [HttpGet("LerArquivoConfiguracao")]
-        public string GetValores()
-        {
-            var valor1 = _configuration["chave1"];
-            var valor2 = _configuration["chave2"];
-
-            var secao1 = _configuration["secao1:chave2"];
-
-            return $"Chave1 = {valor1} \nChave2 = {valor2} \nSeção1 => Chave2 = {secao1}";
-           
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<CategoriaModel> ListaCategoriaPorId (int id)
         {
 
-            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            var categoria = _repository.ListaCategoriaPorId(id);
 
             if(categoria == null)
             {
@@ -53,13 +40,54 @@ namespace CatalogoApiNovo.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public async Task<ActionResult<IEnumerable<CategoriaModel>>> ListaTodasCategorias()
+        public ActionResult<IEnumerable<CategoriaModel>> ListaTodasCategorias()
         {
-            return await _context.Categorias.AsNoTracking().ToListAsync();
+            var categorias = _repository.ListaTodasCategorias();
+            return Ok(categorias);
         }
 
         [HttpPost]
+        public ActionResult AdicionaCategoria(CategoriaModel categoria)
+        {
+            if (categoria is null)
+            {
+                _logger.LogWarning($"Dados inválidos");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Dados inválidos");
+            }
 
+            var CategoriaCriada = _repository.AdicionaCategoria(categoria);
+
+            return new CreatedAtActionResult("ListaTodasCategorias", "CategoriaController", new { id = CategoriaCriada.CategoriaId }, CategoriaCriada);
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult AtualizaCategoria(int id,  CategoriaModel categoria)
+        {
+            if (id != categoria.CategoriaId)
+            {
+                _logger.LogWarning($"Categoria com id= {id} não encontrado");
+                return StatusCode(StatusCodes.Status400BadRequest, $"Categoria com id= {id} não encontrado");
+            }
+            _repository.AtualizaCategoria(categoria);
+
+            return Ok(categoria);
+            }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeletaCategoria (int id)
+        {
+            var categoria = _repository.ListaCategoriaPorId(id);
+            if(categoria is null)
+            {
+                _logger.LogWarning($"Categoria com id= {id} não encontrado");
+                return StatusCode(StatusCodes.Status404NotFound, $"Categoria com id= {id} não encontrado");
+            }
+
+           var categoriaExcluida = _repository.DeletaCategoria(id);
+
+            return Ok(categoriaExcluida);
+        }
+        }
 
     }
-}
+

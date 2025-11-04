@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CatalogoApiNovo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3e6560e3d697d3fa9290e7e089e5033535b129ac")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c00b3726467f1d91245b53b24d22570126a33b61")]
 [assembly: System.Reflection.AssemblyProductAttribute("CatalogoApiNovo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CatalogoApiNovo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
