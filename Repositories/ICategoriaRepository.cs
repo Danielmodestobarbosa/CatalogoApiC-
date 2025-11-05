@@ -2,14 +2,8 @@
 
 namespace CatalogoApiNovo.Repositories
 {
-    public interface ICategoriaRepository
+    public interface ICategoriaRepository : IRepository<CategoriaModel>
     {
-
-        IEnumerable<CategoriaModel> ListaTodasCategorias();
-        CategoriaModel ListaCategoriaPorId (int id);
-        CategoriaModel AdicionaCategoria(CategoriaModel categoria);
-        CategoriaModel AtualizaCategoria(CategoriaModel categoria);
-        CategoriaModel DeletaCategoria (int id);
 
     }
 }

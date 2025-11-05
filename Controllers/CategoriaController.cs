@@ -14,7 +14,7 @@ namespace CatalogoApiNovo.Controllers
     public class CategoriaController : ControllerBase
     {
 
-        private readonly ICategoriaRepository _repository;
+        private readonly IRepository<CategoriaModel> _repository;
         private readonly ILogger<CategoriaController> _logger;
 
         public CategoriaController(ICategoriaRepository repository, ILogger<CategoriaController> logger)
@@ -27,7 +27,7 @@ namespace CatalogoApiNovo.Controllers
         public ActionResult<CategoriaModel> ListaCategoriaPorId (int id)
         {
 
-            var categoria = _repository.ListaCategoriaPorId(id);
+            var categoria = _repository.Get((c => c.CategoriaId == id);
 
             if(categoria == null)
             {
@@ -42,7 +42,7 @@ namespace CatalogoApiNovo.Controllers
         [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<CategoriaModel>> ListaTodasCategorias()
         {
-            var categorias = _repository.ListaTodasCategorias();
+            var categorias = _repository.GetAll();
             return Ok(categorias);
         }
 
@@ -55,7 +55,7 @@ namespace CatalogoApiNovo.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Dados inválidos");
             }
 
-            var CategoriaCriada = _repository.AdicionaCategoria(categoria);
+            var CategoriaCriada = _repository.Create(categoria);
 
             return new CreatedAtActionResult("ListaTodasCategorias", "CategoriaController", new { id = CategoriaCriada.CategoriaId }, CategoriaCriada);
         }
@@ -68,7 +68,7 @@ namespace CatalogoApiNovo.Controllers
                 _logger.LogWarning($"Categoria com id= {id} não encontrado");
                 return StatusCode(StatusCodes.Status400BadRequest, $"Categoria com id= {id} não encontrado");
             }
-            _repository.AtualizaCategoria(categoria);
+            _repository.Update(categoria);
 
             return Ok(categoria);
             }
@@ -76,14 +76,14 @@ namespace CatalogoApiNovo.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeletaCategoria (int id)
         {
-            var categoria = _repository.ListaCategoriaPorId(id);
+            var categoria = _repository.Get(c => c.CategoriaId == id);
             if(categoria is null)
             {
                 _logger.LogWarning($"Categoria com id= {id} não encontrado");
                 return StatusCode(StatusCodes.Status404NotFound, $"Categoria com id= {id} não encontrado");
             }
 
-           var categoriaExcluida = _repository.DeletaCategoria(id);
+           var categoriaExcluida = _repository.Delete(categoria);
 
             return Ok(categoriaExcluida);
         }

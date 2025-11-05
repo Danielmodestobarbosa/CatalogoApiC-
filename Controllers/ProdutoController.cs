@@ -1,6 +1,7 @@
 ﻿using CatalogoApiNovo.Data;
 using CatalogoApiNovo.Filters;
 using CatalogoApiNovo.Model;
+using CatalogoApiNovo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,26 +13,47 @@ namespace CatalogoApiNovo.Controllers
     public class ProdutoController : ControllerBase
     {
         //Injeção de dependência
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _produtoRepository;
         private readonly ILogger _logger;
 
-        public ProdutoController(AppDbContext context, ILogger<ProdutoController> logger)
+        public ProdutoController(IProdutoRepository produtoRepository, ILogger<ProdutoController> logger)
         {
-            _context = context;
+            _produtoRepository = produtoRepository;
             _logger = logger;
+        }
+
+        [HttpGet("produtos/{id}")]
+        public ActionResult<IEnumerable<ProdutoModel>> GetProdutosCategorias(int id)
+        {
+            var produtos = _produtoRepository.GetProdutosPorCategoria(id);
+            if(produtos == null)
+            {
+                _logger.LogWarning("Produto é nulo");
+                return NotFound("Produito é nulo");
+            }
+
+            return Ok(produtos);
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public async Task <IEnumerable<ProdutoModel>> BuscarTodosProdutos()
+        public ActionResult<IEnumerable<ProdutoModel>> ListaTodosProdutos()
         {
-            return await _context.Produtos.AsNoTracking().ToListAsync();
+            var produto = _produtoRepository.GetAll().ToList(); 
+            if(produto is null)
+            {
+                _logger.LogWarning("O produto é nulo");
+                return NotFound("O produto é nulo");
+            }
+
+            return Ok(produto);
+
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<ProdutoModel> ObterProdutoPorId(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p=> p.ProdutoId == id);
+            var produto = _produtoRepository.Get(c => c.ProdutoId == id);
 
             if(produto is null)
             {
@@ -51,10 +73,9 @@ namespace CatalogoApiNovo.Controllers
                   return StatusCode(StatusCodes.Status500InternalServerError, "Dados inválidos");
             }
 
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+             var produtoCriado = _produtoRepository.Create(produto);
 
-            return Created($"/api/Produtos/{produto.ProdutoId}", produto);
+            return Created($"/api/Produtos/{produtoCriado.ProdutoId}", produtoCriado);
         }
 
         [HttpPut("{id:int}")]
@@ -66,26 +87,24 @@ namespace CatalogoApiNovo.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, $"\"Produto com id= {id} não encontrado");
             }
 
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
+          var produtoAtualizado = _produtoRepository.Update(produto);
 
-            return Ok(produto);
+         return Ok(produtoAtualizado);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult DeletarProduto(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-            if (produto is null)
+            var produto = _produtoRepository.Get(p => p.ProdutoId == id);
+            if (id != produto.ProdutoId)
             {
-                _logger.LogWarning($"Produco com {id} não encotrado");
-                return StatusCode(StatusCodes.Status404NotFound, $"Produco com {id} não encotrado");
+                _logger.LogWarning($"Produto com id= {id} não encontrado");
+                return StatusCode(StatusCodes.Status400BadRequest, $"\"Produto com id= {id} não encontrado");
             }
 
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
+           var produtoDeletado = _produtoRepository.Delete(produto);
 
-            return Ok(produto);
+            return Ok(produtoDeletado);
         }
     }
 }

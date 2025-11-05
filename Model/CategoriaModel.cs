@@ -21,7 +21,7 @@ namespace CatalogoApiNovo.Model
         [Required]
         [StringLength(200)]
         public string ImagemUrl { get; set; }
-
+        
         public ICollection<ProdutoModel> Produtos { get; set; }
 
     }

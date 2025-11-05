@@ -101,7 +101,7 @@
   },
   {
     "ContainingType": "CatalogoApiNovo.Controllers.ProdutoController",
-    "Method": "BuscarTodosProdutos",
+    "Method": "ListaTodosProdutos",
     "RelativePath": "Produto",
     "HttpMethod": "GET",
     "IsController": true,
