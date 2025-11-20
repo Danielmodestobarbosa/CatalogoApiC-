@@ -13,19 +13,18 @@ namespace CatalogoApiNovo.Controllers
     public class ProdutoController : ControllerBase
     {
         //Injeção de dependência
-        private readonly IProdutoRepository _produtoRepository;
+        private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
 
-        public ProdutoController(IProdutoRepository produtoRepository, ILogger<ProdutoController> logger)
+        public ProdutoController(IUnitOfWork uof)
         {
-            _produtoRepository = produtoRepository;
-            _logger = logger;
+            _uof = uof;
         }
 
         [HttpGet("produtos/{id}")]
         public ActionResult<IEnumerable<ProdutoModel>> GetProdutosCategorias(int id)
         {
-            var produtos = _produtoRepository.GetProdutosPorCategoria(id);
+            var produtos = _uof.ProdutoRepository.GetProdutosPorCategoria(id);
             if(produtos == null)
             {
                 _logger.LogWarning("Produto é nulo");
@@ -39,7 +38,7 @@ namespace CatalogoApiNovo.Controllers
         [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<ProdutoModel>> ListaTodosProdutos()
         {
-            var produto = _produtoRepository.GetAll().ToList(); 
+            var produto = _uof.ProdutoRepository.GetAll().ToList(); 
             if(produto is null)
             {
                 _logger.LogWarning("O produto é nulo");
@@ -53,7 +52,7 @@ namespace CatalogoApiNovo.Controllers
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<ProdutoModel> ObterProdutoPorId(int id)
         {
-            var produto = _produtoRepository.Get(c => c.ProdutoId == id);
+            var produto = _uof.ProdutoRepository.Get(c => c.ProdutoId == id);
 
             if(produto is null)
             {
@@ -73,7 +72,8 @@ namespace CatalogoApiNovo.Controllers
                   return StatusCode(StatusCodes.Status500InternalServerError, "Dados inválidos");
             }
 
-             var produtoCriado = _produtoRepository.Create(produto);
+             var produtoCriado = _uof.ProdutoRepository.Create(produto);
+            _uof.Commit();
 
             return Created($"/api/Produtos/{produtoCriado.ProdutoId}", produtoCriado);
         }
@@ -87,7 +87,8 @@ namespace CatalogoApiNovo.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, $"\"Produto com id= {id} não encontrado");
             }
 
-          var produtoAtualizado = _produtoRepository.Update(produto);
+          var produtoAtualizado = _uof.ProdutoRepository.Update(produto);
+         _uof.Commit();
 
          return Ok(produtoAtualizado);
         }
@@ -95,14 +96,15 @@ namespace CatalogoApiNovo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult DeletarProduto(int id)
         {
-            var produto = _produtoRepository.Get(p => p.ProdutoId == id);
+            var produto = _uof.ProdutoRepository.Get(p => p.ProdutoId == id);
             if (id != produto.ProdutoId)
             {
                 _logger.LogWarning($"Produto com id= {id} não encontrado");
                 return StatusCode(StatusCodes.Status400BadRequest, $"\"Produto com id= {id} não encontrado");
             }
 
-           var produtoDeletado = _produtoRepository.Delete(produto);
+           var produtoDeletado = _uof.ProdutoRepository.Delete(produto);
+            _uof.Commit();
 
             return Ok(produtoDeletado);
         }
