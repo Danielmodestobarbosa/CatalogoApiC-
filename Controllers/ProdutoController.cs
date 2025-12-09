@@ -1,4 +1,5 @@
 ﻿using CatalogoApiNovo.Data;
+using CatalogoApiNovo.DTOs;
 using CatalogoApiNovo.Filters;
 using CatalogoApiNovo.Model;
 using CatalogoApiNovo.Repositories;
@@ -22,7 +23,7 @@ namespace CatalogoApiNovo.Controllers
         }
 
         [HttpGet("produtos/{id}")]
-        public ActionResult<IEnumerable<ProdutoModel>> GetProdutosCategorias(int id)
+        public ActionResult<IEnumerable<ProdutoDto>> GetProdutosCategorias(int id)
         {
             var produtos = _uof.ProdutoRepository.GetProdutosPorCategoria(id);
             if(produtos == null)
@@ -30,13 +31,14 @@ namespace CatalogoApiNovo.Controllers
                 _logger.LogWarning("Produto é nulo");
                 return NotFound("Produito é nulo");
             }
+            
 
             return Ok(produtos);
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public ActionResult<IEnumerable<ProdutoModel>> ListaTodosProdutos()
+        public ActionResult<IEnumerable<ProdutoDto>> ListaTodosProdutos()
         {
             var produto = _uof.ProdutoRepository.GetAll().ToList(); 
             if(produto is null)
@@ -50,7 +52,7 @@ namespace CatalogoApiNovo.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<ProdutoModel> ObterProdutoPorId(int id)
+        public ActionResult<ProdutoDto> ObterProdutoPorId(int id)
         {
             var produto = _uof.ProdutoRepository.Get(c => c.ProdutoId == id);
 
@@ -64,7 +66,7 @@ namespace CatalogoApiNovo.Controllers
         }
 
         [HttpPost]
-        public ActionResult  AdicionaProduto (ProdutoModel produto)
+        public ActionResult  AdicionaProduto (ProdutoDto produtoDto)
         {
             if (produto is null)
             {
@@ -72,14 +74,14 @@ namespace CatalogoApiNovo.Controllers
                   return StatusCode(StatusCodes.Status500InternalServerError, "Dados inválidos");
             }
 
-             var produtoCriado = _uof.ProdutoRepository.Create(produto);
+             var produtoCriado = _uof.ProdutoRepository.Create(produtoDto);
             _uof.Commit();
 
             return Created($"/api/Produtos/{produtoCriado.ProdutoId}", produtoCriado);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult AtualizaProduto (int id, ProdutoModel produto)
+        public ActionResult AtualizaProduto (int id, ProdutoDto produto)
         {
             if(id != produto.ProdutoId)
             {
@@ -94,7 +96,7 @@ namespace CatalogoApiNovo.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult DeletarProduto(int id)
+        public ActionResult<ProdutoDto> DeletarProduto(int id)
         {
             var produto = _uof.ProdutoRepository.Get(p => p.ProdutoId == id);
             if (id != produto.ProdutoId)
