@@ -29,7 +29,7 @@ namespace CatalogoApi.API.NovaPasta
         }
 
         [HttpGet]
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
       public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoria()
         {
             try
@@ -175,6 +175,7 @@ namespace CatalogoApi.API.NovaPasta
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult <Categoria>> Delete (int id)
         {
             try
