@@ -176,7 +176,7 @@ namespace CatalogoApi.API.NovaPasta
 
         [HttpDelete("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<ActionResult <Categoria>> Delete (int id)
+        public async Task<ActionResult <Categoria>> Deletee (int id)
         {
             try
             {
